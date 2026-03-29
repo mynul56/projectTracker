@@ -34,7 +34,6 @@ import { format } from 'date-fns';
 import { Edit2, Save, X, Trash2, ArrowUpDown, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 
 export type Project = {
   id: string;
@@ -113,10 +112,16 @@ export function ProjectTable({ initialData, readOnly = false, userRole = 'co_lea
 
     // Generate workbook buffer
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const excelBlob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
     
-    // Save file using file-saver
-    saveAs(excelBlob, `projects_export_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `projects_export_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const getStatusColor = (status: string, deadline: string) => {

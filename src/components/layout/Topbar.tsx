@@ -2,6 +2,7 @@
 
 import { Search, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { ThemeToggle } from './ThemeToggle';
 
 interface TopbarProps {
   userEmail: string | null;
@@ -20,6 +21,7 @@ export function Topbar({ userEmail }: TopbarProps) {
         </div>
       </div>
       <div className="flex items-center space-x-4">
+        <ThemeToggle />
         <div className="flex items-center space-x-2 text-sm">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">
             {userEmail?.charAt(0).toUpperCase() || 'U'}

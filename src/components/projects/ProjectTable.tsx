@@ -31,8 +31,9 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { Edit2, Save, X, Trash2, ArrowUpDown } from 'lucide-react';
+import { Edit2, Save, X, Trash2, ArrowUpDown, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import * as XLSX from 'xlsx';
 
 export type Project = {
   id: string;
@@ -91,6 +92,36 @@ export function ProjectTable({ initialData, readOnly = false, userRole = 'co_lea
     } catch (err) {
       console.error('Delete error', err);
     }
+  };
+
+  const handleDownloadExcel = () => {
+    const exportData = data.map((p) => ({
+      'Project Name': p.project_name,
+      'Id': p.project_id,
+      'Profile': p.profile,
+      'Last Update': p.last_update,
+      'Timeline': format(new Date(p.deadline), 'MMM d, yyyy'),
+      'Client Status': p.client_status,
+      'Last Seen (Inactive)': p.last_seen_info,
+      'Notes': p.notes || '',
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Projects');
+
+    // Generate workbook buffer
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+    
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `projects_export_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const getStatusColor = (status: string, deadline: string) => {
@@ -243,6 +274,22 @@ export function ProjectTable({ initialData, readOnly = false, userRole = 'co_lea
       },
     },
     {
+      accessorKey: 'notes',
+      header: 'Notes',
+      cell: ({ row }) => {
+        const isEditing = editingId === row.original.id;
+        return isEditing ? (
+          <Input
+            value={editForm.notes || ''}
+            onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+            className="h-8 w-full"
+          />
+        ) : (
+          <span className="text-sm line-clamp-2 max-w-[200px]">{row.getValue('notes')}</span>
+        );
+      },
+    },
+    {
       id: 'actions',
       cell: ({ row }) => {
         if (readOnly) return null;
@@ -301,6 +348,17 @@ export function ProjectTable({ initialData, readOnly = false, userRole = 'co_lea
           className="max-w-sm bg-white dark:bg-slate-900"
         />
         <div className="flex items-center space-x-2">
+          {userRole === 'co_leader' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadExcel}
+              className="flex items-center text-green-600 border-green-200 hover:bg-green-50"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download Excel
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"

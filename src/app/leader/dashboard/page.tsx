@@ -3,23 +3,33 @@
 import { useState, useEffect } from 'react';
 import { SummaryCards } from '@/components/analytics/SummaryCards';
 import { AnalyticsCharts } from '@/components/analytics/AnalyticsCharts';
-import { ProjectTable } from '@/components/projects/ProjectTable';
+import { ProjectTable, Project } from '@/components/projects/ProjectTable';
+import { AddProjectModal } from '@/components/projects/AddProjectModal';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 
 export default function LeaderDashboard() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch('/api/projects')
-      .then((res) => res.json())
-      .then((data) => {
+  const fetchProjects = async () => {
+    try {
+      const res = await fetch('/api/projects');
+      if (res.ok) {
+        const data = await res.json();
         setProjects(data);
-        setLoading(false);
-      });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
   }, []);
 
   if (loading) {
@@ -143,32 +153,12 @@ export default function LeaderDashboard() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Project Updates</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Project Management (Admin Panel)</CardTitle>
+          <AddProjectModal onSuccess={fetchProjects} userRole="leader" />
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Project</TableHead>
-                <TableHead>Update Message</TableHead>
-                <TableHead>Last Seen</TableHead>
-                <TableHead>Updated At</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {projects.slice(0, 5).map((p: any) => (
-                <TableRow key={p.id}>
-                  <TableCell className="font-medium">{p.project_name}</TableCell>
-                  <TableCell>{p.last_update}</TableCell>
-                  <TableCell>{p.last_seen_info}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {format(new Date(p.updated_at), 'MMM d, h:mm a')}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <ProjectTable initialData={projects} userRole="leader" />
         </CardContent>
       </Card>
     </div>

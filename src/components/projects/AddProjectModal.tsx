@@ -23,9 +23,10 @@ import { Plus } from 'lucide-react';
 
 interface AddProjectModalProps {
   onSuccess: () => void;
+  userRole?: string;
 }
 
-export function AddProjectModal({ onSuccess }: AddProjectModalProps) {
+export function AddProjectModal({ onSuccess, userRole = 'co_leader' }: AddProjectModalProps) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     project_name: '',
@@ -67,14 +68,16 @@ export function AddProjectModal({ onSuccess }: AddProjectModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button className="flex items-center">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Project
-          </Button>
-        }
-      />
+      {userRole === 'leader' && (
+        <DialogTrigger
+          render={
+            <Button className="flex items-center">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Project
+            </Button>
+          }
+        />
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add New Project</DialogTitle>

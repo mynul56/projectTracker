@@ -6,6 +6,19 @@ import { AddProjectModal } from '@/components/projects/AddProjectModal';
 export default function CoLeaderDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string>('co_leader');
+
+  const fetchSession = async () => {
+    try {
+      const res = await fetch('/api/auth/session');
+      if (res.ok) {
+        const data = await res.json();
+        setUserRole(data.user.role);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchProjects = async () => {
     try {
@@ -22,6 +35,7 @@ export default function CoLeaderDashboard() {
   };
 
   useEffect(() => {
+    fetchSession();
     fetchProjects();
   }, []);
 
@@ -34,7 +48,7 @@ export default function CoLeaderDashboard() {
             Update and manage project statuses for the team.
           </p>
         </div>
-        <AddProjectModal onSuccess={fetchProjects} />
+        <AddProjectModal onSuccess={fetchProjects} userRole={userRole} />
       </div>
 
       {loading ? (
@@ -42,7 +56,7 @@ export default function CoLeaderDashboard() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       ) : (
-        <ProjectTable initialData={projects} />
+        <ProjectTable initialData={projects} userRole={userRole} />
       )}
     </div>
   );

@@ -49,9 +49,10 @@ export type Project = {
 interface ProjectTableProps {
   initialData: Project[];
   readOnly?: boolean;
+  userRole?: string;
 }
 
-export function ProjectTable({ initialData, readOnly = false }: ProjectTableProps) {
+export function ProjectTable({ initialData, readOnly = false, userRole = 'co_leader' }: ProjectTableProps) {
   const [data, setData] = useState<Project[]>(initialData);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -112,7 +113,8 @@ export function ProjectTable({ initialData, readOnly = false }: ProjectTableProp
       header: 'Project Name',
       cell: ({ row }) => {
         const isEditing = editingId === row.original.id;
-        return isEditing ? (
+        const canEdit = userRole === 'leader';
+        return isEditing && canEdit ? (
           <Input
             value={editForm.project_name}
             onChange={(e) => setEditForm({ ...editForm, project_name: e.target.value })}
@@ -128,7 +130,8 @@ export function ProjectTable({ initialData, readOnly = false }: ProjectTableProp
       header: 'Project ID',
       cell: ({ row }) => {
         const isEditing = editingId === row.original.id;
-        return isEditing ? (
+        const canEdit = userRole === 'leader';
+        return isEditing && canEdit ? (
           <Input
             value={editForm.project_id}
             onChange={(e) => setEditForm({ ...editForm, project_id: e.target.value })}
@@ -144,7 +147,8 @@ export function ProjectTable({ initialData, readOnly = false }: ProjectTableProp
       header: 'Profile',
       cell: ({ row }) => {
         const isEditing = editingId === row.original.id;
-        return isEditing ? (
+        const canEdit = userRole === 'leader';
+        return isEditing && canEdit ? (
           <Input
             value={editForm.profile}
             onChange={(e) => setEditForm({ ...editForm, profile: e.target.value })}
@@ -260,9 +264,11 @@ export function ProjectTable({ initialData, readOnly = false }: ProjectTableProp
                 <Button size="icon" variant="ghost" onClick={() => handleEdit(row.original)} className="h-8 w-8 hover:bg-primary/10">
                   <Edit2 className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="ghost" onClick={() => handleDelete(row.original.id)} className="h-8 w-8 hover:bg-destructive/10">
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
+                {userRole === 'leader' && (
+                  <Button size="icon" variant="ghost" onClick={() => handleDelete(row.original.id)} className="h-8 w-8 hover:bg-destructive/10">
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                )}
               </>
             )}
           </div>

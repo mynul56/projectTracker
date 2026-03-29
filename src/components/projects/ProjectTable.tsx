@@ -72,13 +72,17 @@ export function ProjectTable({ initialData, readOnly = false, userRole = 'co_lea
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm),
       });
+      const result = await res.json();
+      
       if (res.ok) {
-        const updated = await res.json();
-        setData(data.map((p) => (p.id === id ? updated : p)));
+        setData(data.map((p) => (p.id === id ? result : p)));
         setEditingId(null);
+      } else {
+        alert(`Error saving project: ${result.error || 'Unknown error'}`);
       }
     } catch (err) {
       console.error('Save error', err);
+      alert('Failed to save project. Please check your connection.');
     }
   };
 
@@ -158,35 +162,43 @@ export function ProjectTable({ initialData, readOnly = false, userRole = 'co_lea
     },
     {
       accessorKey: 'project_id',
-      header: 'Project ID',
+      header: ({ column }) => (
+        <span className="hidden lg:inline-block">Project ID</span>
+      ),
       cell: ({ row }) => {
         const isEditing = editingId === row.original.id;
         const canEdit = userRole === 'leader';
         return isEditing && canEdit ? (
-          <Input
-            value={editForm.project_id}
-            onChange={(e) => setEditForm({ ...editForm, project_id: e.target.value })}
-            className="h-8 w-full"
-          />
+          <div className="hidden lg:block">
+            <Input
+              value={editForm.project_id}
+              onChange={(e) => setEditForm({ ...editForm, project_id: e.target.value })}
+              className="h-8 w-full"
+            />
+          </div>
         ) : (
-          <span className="text-xs font-mono text-muted-foreground">{row.getValue('project_id')}</span>
+          <span className="text-xs font-mono text-muted-foreground hidden lg:inline-block truncate max-w-[100px]">{row.getValue('project_id')}</span>
         );
       },
     },
     {
       accessorKey: 'profile',
-      header: 'Profile',
+      header: ({ column }) => (
+        <span className="hidden md:inline-block">Profile</span>
+      ),
       cell: ({ row }) => {
         const isEditing = editingId === row.original.id;
         const canEdit = userRole === 'leader';
         return isEditing && canEdit ? (
-          <Input
-            value={editForm.profile}
-            onChange={(e) => setEditForm({ ...editForm, profile: e.target.value })}
-            className="h-8 w-full"
-          />
+          <div className="hidden md:block">
+            <Input
+              value={editForm.profile}
+              onChange={(e) => setEditForm({ ...editForm, profile: e.target.value })}
+              className="h-8 w-full"
+            />
+          </div>
         ) : (
-          <span>{row.getValue('profile')}</span>
+          <span className="hidden md:inline-block">{row.getValue('profile')}</span>
         );
       },
     },
@@ -243,49 +255,61 @@ export function ProjectTable({ initialData, readOnly = false, userRole = 'co_lea
     },
     {
       accessorKey: 'last_update',
-      header: 'Last Update',
+      header: ({ column }) => (
+        <span className="hidden sm:inline-block">Last Update</span>
+      ),
       cell: ({ row }) => {
         const isEditing = editingId === row.original.id;
         return isEditing ? (
-          <Input
-            value={editForm.last_update}
-            onChange={(e) => setEditForm({ ...editForm, last_update: e.target.value })}
-            className="h-8 w-full"
-          />
+          <div className="hidden sm:block">
+            <Input
+              value={editForm.last_update}
+              onChange={(e) => setEditForm({ ...editForm, last_update: e.target.value })}
+              className="h-8 w-full"
+            />
+          </div>
         ) : (
-          <span className="text-sm">{row.getValue('last_update')}</span>
+          <span className="text-sm hidden sm:inline-block">{row.getValue('last_update')}</span>
         );
       },
     },
     {
       accessorKey: 'last_seen_info',
-      header: 'Last Seen',
+      header: ({ column }) => (
+        <span className="hidden md:inline-block">Last Seen</span>
+      ),
       cell: ({ row }) => {
         const isEditing = editingId === row.original.id;
         return isEditing ? (
-          <Input
-            value={editForm.last_seen_info}
-            onChange={(e) => setEditForm({ ...editForm, last_seen_info: e.target.value })}
-            className="h-8 w-full"
-          />
+          <div className="hidden md:block">
+            <Input
+              value={editForm.last_seen_info}
+              onChange={(e) => setEditForm({ ...editForm, last_seen_info: e.target.value })}
+              className="h-8 w-full"
+            />
+          </div>
         ) : (
-          <span className="text-xs text-muted-foreground">{row.getValue('last_seen_info')}</span>
+          <span className="text-xs text-muted-foreground hidden md:inline-block">{row.getValue('last_seen_info')}</span>
         );
       },
     },
     {
       accessorKey: 'notes',
-      header: 'Notes',
+      header: ({ column }) => (
+        <span className="hidden lg:inline-block">Notes</span>
+      ),
       cell: ({ row }) => {
         const isEditing = editingId === row.original.id;
         return isEditing ? (
-          <Input
-            value={editForm.notes || ''}
-            onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-            className="h-8 w-full"
-          />
+          <div className="hidden lg:block">
+            <Input
+              value={editForm.notes || ''}
+              onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+              className="h-8 w-full"
+            />
+          </div>
         ) : (
-          <span className="text-sm line-clamp-2 max-w-[200px]">{row.getValue('notes')}</span>
+          <span className="text-sm line-clamp-1 max-w-[150px] hidden lg:inline-block">{row.getValue('notes')}</span>
         );
       },
     },
@@ -338,47 +362,54 @@ export function ProjectTable({ initialData, readOnly = false, userRole = 'co_lea
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Input
-          placeholder="Filter by project name..."
-          value={(table.getColumn('project_name')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('project_name')?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm bg-white dark:bg-slate-900"
-        />
-        <div className="flex items-center space-x-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="relative w-full sm:max-w-xs">
+          <Input
+            placeholder="Filter projects..."
+            value={(table.getColumn('project_name')?.getFilterValue() as string) ?? ''}
+            onChange={(event) =>
+              table.getColumn('project_name')?.setFilterValue(event.target.value)
+            }
+            className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+          />
+        </div>
+        <div className="flex items-center gap-2 self-end sm:self-auto">
           {userRole === 'co_leader' && (
             <Button
               variant="outline"
               size="sm"
               onClick={handleDownloadExcel}
-              className="flex items-center text-green-600 border-green-200 hover:bg-green-50"
+              className="flex items-center text-green-600 border-green-200 dark:border-green-900/50 hover:bg-green-50 dark:hover:bg-green-900/20"
             >
               <Download className="mr-2 h-4 w-4" />
-              Download Excel
+              <span className="hidden xs:inline">Excel</span>
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {'<'}
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              {'>'}
+            </Button>
+          </div>
         </div>
       </div>
-      <div className="rounded-md border bg-white dark:bg-slate-900">
-        <Table>
+      <div className="rounded-xl border bg-white dark:bg-slate-900 overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -415,6 +446,7 @@ export function ProjectTable({ initialData, readOnly = false, userRole = 'co_lea
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
     </div>
   );

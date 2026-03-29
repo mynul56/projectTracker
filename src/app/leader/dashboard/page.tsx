@@ -75,9 +75,9 @@ export default function LeaderDashboard() {
 
   return (
     <div className="space-y-8 pb-12">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Executive Overview</h1>
-        <p className="text-muted-foreground text-sm mt-1">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Executive Overview</h1>
+        <p className="text-muted-foreground text-sm">
           Real-time analytics and project monitoring for the leadership team.
         </p>
       </div>
@@ -92,30 +92,32 @@ export default function LeaderDashboard() {
             <CardTitle className="text-red-600 dark:text-red-400">Overdue Projects</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Project</TableHead>
-                  <TableHead>Deadline</TableHead>
-                  <TableHead>Client Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {overdueProjects.length > 0 ? (
-                  overdueProjects.map((p: any) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-medium">{p.project_name}</TableCell>
-                      <TableCell className="text-red-600">{format(new Date(p.deadline), 'MMM d, yyyy')}</TableCell>
-                      <TableCell><Badge variant="outline">{p.client_status}</Badge></TableCell>
-                    </TableRow>
-                  ))
-                ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center text-muted-foreground">No overdue projects</TableCell>
+                    <TableHead>Project</TableHead>
+                    <TableHead>Deadline</TableHead>
+                    <TableHead className="text-right">Status</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {overdueProjects.length > 0 ? (
+                    overdueProjects.map((p: any) => (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-medium whitespace-nowrap">{p.project_name}</TableCell>
+                        <TableCell className="text-red-600 whitespace-nowrap">{format(new Date(p.deadline), 'MMM d, yyyy')}</TableCell>
+                        <TableCell className="text-right"><Badge variant="outline" className="whitespace-nowrap">{p.client_status}</Badge></TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center text-muted-foreground">No overdue projects</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
 
@@ -124,36 +126,38 @@ export default function LeaderDashboard() {
             <CardTitle className="text-yellow-600 dark:text-yellow-400">Inactive Clients</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Project</TableHead>
-                  <TableHead>Last Seen</TableHead>
-                  <TableHead>Profile</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {inactiveProjects.length > 0 ? (
-                  inactiveProjects.map((p: any) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-medium">{p.project_name}</TableCell>
-                      <TableCell>{p.last_seen_info}</TableCell>
-                      <TableCell>{p.profile}</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center text-muted-foreground">No inactive clients</TableCell>
+                    <TableHead>Project</TableHead>
+                    <TableHead>Last Seen</TableHead>
+                    <TableHead className="text-right">Profile</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {inactiveProjects.length > 0 ? (
+                    inactiveProjects.map((p: any) => (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-medium whitespace-nowrap">{p.project_name}</TableCell>
+                        <TableCell className="whitespace-nowrap">{p.last_seen_info}</TableCell>
+                        <TableCell className="text-right whitespace-nowrap">{p.profile}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center text-muted-foreground">No inactive clients</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <CardTitle>Project Management (Admin Panel)</CardTitle>
           <AddProjectModal onSuccess={fetchProjects} userRole="leader" />
         </CardHeader>

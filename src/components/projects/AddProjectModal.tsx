@@ -78,12 +78,12 @@ export function AddProjectModal({ onSuccess, userRole = 'co_leader' }: AddProjec
           }
         />
       )}
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Add New Project</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="p_name">Project Name</Label>
               <Input
@@ -103,7 +103,7 @@ export function AddProjectModal({ onSuccess, userRole = 'co_leader' }: AddProjec
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="profile">Profile</Label>
               <Input
@@ -124,7 +124,7 @@ export function AddProjectModal({ onSuccess, userRole = 'co_leader' }: AddProjec
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="status">Client Status</Label>
               <Select

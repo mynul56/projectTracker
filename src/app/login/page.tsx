@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -46,43 +47,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 dark:bg-slate-950 transition-colors duration-500">
-      {/* Background Decor */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px] animate-pulse" />
-        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px] animate-pulse" />
+    <div className="relative flex min-h-screen items-center justify-center px-4 py-12 overflow-hidden">
+      {/* Background Image Layer */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <Image
+          src="/login-bg.png"
+          alt="Background"
+          fill
+          priority
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" />
       </div>
 
-      <div className="relative group w-full max-w-md">
-        {/* The "Edge-Looping Light" Effect */}
-        <div className="absolute -inset-[1px] rounded-xl overflow-hidden pointer-events-none z-0">
-          <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
-            <rect
-              x="0.5"
-              y="0.5"
-              width="calc(100% - 1px)"
-              height="calc(100% - 1px)"
-              rx="11"
-              fill="none"
-              stroke="url(#borderGradient)"
-              strokeWidth="2"
-              strokeDasharray="100 400"
-              className="animate-[border-beam_3s_linear_infinite]"
-            />
-            <defs>
-              <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#3B82F6" stopOpacity="0" />
-                <stop offset="50%" stopColor="#3B82F6" stopOpacity="1" />
-                <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
+      <div className="relative group w-full max-w-md z-10">
 
-        {/* Glow behind the beam */}
-        <div className="absolute -inset-[2px] rounded-xl bg-primary/20 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-        <Card className="relative w-full border-none shadow-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-xl z-10 overflow-hidden">
+        <Card className="relative w-full border-none shadow-2xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl rounded-xl z-10 overflow-hidden">
           <CardHeader className="space-y-1 text-center pb-2">
             <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-2">
               <Lock className="h-6 w-6 text-primary" />

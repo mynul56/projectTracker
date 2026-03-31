@@ -138,7 +138,7 @@ export default function LoginPage() {
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="pt-2 pb-8">
+            <CardFooter className="pt-6 pb-8">
               <Button 
                 className="w-full h-11 text-base font-semibold transition-all hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98] rounded-lg" 
                 type="submit" 

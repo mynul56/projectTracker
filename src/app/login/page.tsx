@@ -51,7 +51,7 @@ export default function LoginPage() {
       {/* Background Image Layer */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <Image
-          src="/login-bg.png"
+          src="/login-bg.jpg"
           alt="Background"
           fill
           priority

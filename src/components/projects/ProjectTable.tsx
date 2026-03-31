@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { Edit2, Save, X, Trash2, ArrowUpDown, Download } from 'lucide-react';
+import { Edit2, Save, X, Trash2, ArrowUpDown, Download, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import * as XLSX from 'xlsx';
 
@@ -98,34 +98,77 @@ export function ProjectTable({ initialData, readOnly = false, userRole = 'co_lea
     }
   };
 
-  const handleDownloadExcel = () => {
+  const handleDownloadCSV = () => {
     const exportData = data.map((p) => ({
       'Project Name': p.project_name,
-      'Id': p.project_id,
+      'Project ID': p.project_id,
       'Profile': p.profile,
+      'Status': p.client_status,
       'Last Update': p.last_update,
-      'Timeline': format(new Date(p.deadline), 'MMM d, yyyy'),
-      'Client Status': p.client_status,
-      'Last Seen (Inactive)': p.last_seen_info,
+      'Last Seen': p.last_seen_info,
       'Notes': p.notes || '',
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Projects');
-
-    // Generate workbook buffer
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+    const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     
-    // Create download link
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `projects_export_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+    link.setAttribute('download', `projects_export_${format(new Date(), 'yyyy-MM-dd')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const bstr = event.target?.result;
+        const workbook = XLSX.read(bstr, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+        if (jsonData.length === 0) {
+          alert('The uploaded file is empty.');
+          return;
+        }
+
+        const formattedData = jsonData.map((row: any) => ({
+          project_name: row['Project Name'] || row['project_name'] || 'Untitled Project',
+          project_id: String(row['Project ID'] || row['Id'] || row['project_id'] || Math.random().toString(36).substr(2, 9)),
+          profile: row['Profile'] || row['profile'] || 'General',
+          client_status: row['Status'] || row['client_status'] || 'Active',
+          last_update: row['Last Update'] || row['last_update'] || 'Bulk Uploaded',
+          last_seen_info: row['Last Seen'] || row['last_seen_info'] || 'Just now',
+          notes: row['Notes'] || row['notes'] || '',
+        }));
+
+        const res = await fetch('/api/projects/bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formattedData),
+        });
+
+        if (res.ok) {
+          alert('Projects uploaded and updated successfully!');
+          window.location.reload();
+        } else {
+          const error = await res.json();
+          alert(`Failed to upload: ${error.error || 'Unknown error'}`);
+        }
+      } catch (err) {
+        console.error('File parse error:', err);
+        alert('Failed to parse file. Please ensure it is a valid CSV or Excel file.');
+      }
+    };
+    reader.readAsBinaryString(file);
   };
 
   const getStatusColor = (status: string, deadline: string) => {
@@ -374,15 +417,35 @@ export function ProjectTable({ initialData, readOnly = false, userRole = 'co_lea
           />
         </div>
         <div className="flex items-center gap-2 self-end sm:self-auto">
+          {userRole === 'leader' && (
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                className="hidden"
+                id="csv-upload"
+                onChange={handleFileUpload}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById('csv-upload')?.click()}
+                className="flex items-center text-blue-600 border-blue-200 dark:border-blue-900/50 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                <span className="hidden xs:inline">Upload CSV</span>
+              </Button>
+            </div>
+          )}
           {userRole === 'co_leader' && (
             <Button
               variant="outline"
               size="sm"
-              onClick={handleDownloadExcel}
+              onClick={handleDownloadCSV}
               className="flex items-center text-green-600 border-green-200 dark:border-green-900/50 hover:bg-green-50 dark:hover:bg-green-900/20"
             >
               <Download className="mr-2 h-4 w-4" />
-              <span className="hidden xs:inline">Excel</span>
+              <span className="hidden xs:inline">Download CSV</span>
             </Button>
           )}
           <div className="flex items-center gap-1">
